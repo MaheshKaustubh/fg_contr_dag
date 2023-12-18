@@ -38,7 +38,7 @@ def check():
 
     from datetime import datetime
 
-    wds=[datetime(2023, 8, 1).date(), datetime(2023, 9, 1).date(), datetime(2023, 10, 3).date(), datetime(2023, 11, 2).date(), datetime(2023, 12, 4).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date()]
+    wds=[datetime(2023, 8, 1).date(), datetime(2023, 9, 1).date(), datetime(2023, 10, 3).date(), datetime(2023, 11, 2).date(), datetime(2023, 12, 4).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
 
     if(datetime.now().date() in wds):
 
@@ -178,7 +178,7 @@ def load_to_snow():
 
     try: 
 
-        sfconnector.execute("insert into CONSOLIDATED_WORKER_HC_TBL_DRAFT_KAUSTUBH select t.$1,t.$2,t.$3,t.$4,t.$5,t.$6,t.$7,t.$8,t.$9,t.$10,t.$11,t.$12,t.$13,t.$14,t.$15,t.$16,t.$17,t.$18,t.$19,t.$20,t.$21,t.$22,t.$23,t.$24,t.$25,t.$26,t.$27,t.$28,t.$29,t.$30,t.$31,t.$32,t.$33,t.$34,t.$35,t.$36,t.$37,t.$38,t.$39,t.$40,t.$41,t.$42,t.$43,t.$44,t.$45,t.$46,t.$47,t.$48,t.$49,t.$50,t.$51,t.$52,t.$53,t.$54,t.$55,t.$56,t.$57,t.$58,t.$59,t.$60, current_timestamp from @data_load_stage/CONSOLIDATED_WORKER_HEADCOUNT_DATA.csv as t")
+        sfconnector.execute("insert into CONSOLIDATED_WORKER_HC_TBL_DRAFT_KAUSTUBH select t.$1,t.$2,t.$3,t.$4,t.$5,t.$6,t.$7,t.$8,t.$9,t.$10,t.$11,t.$12,t.$13,t.$14,t.$15,t.$16,t.$17,t.$18,t.$19,t.$20,t.$21,t.$22,t.$23,t.$24,t.$25,t.$26,t.$27,t.$28,t.$29,t.$30,t.$31,t.$32,t.$33,t.$34,t.$35,t.$36,t.$37,t.$38,t.$39,t.$40,t.$41,t.$42,t.$43,t.$44,t.$45,t.$46,t.$47,t.$48,t.$49,t.$50,t.$51,t.$52,t.$53,t.$54,t.$55,t.$56,t.$57,t.$58,t.$59,t.$60, current_timestamp from @data_load_stage/CONSOLIDATED_WORKER_HEADCOUNT_TEST.csv.gz as t")
 
     except Exception as e:
 
@@ -199,7 +199,7 @@ with DAG(
 
     description='DAG to download file from SFTP',
 
-    schedule_interval='15 15 * * *',
+    schedule_interval='15 17 * * *',
 
     catchup=False
 
