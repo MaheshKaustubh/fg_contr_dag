@@ -166,7 +166,7 @@ def load_to_snow():
 
         try: 
 
-            sfconnector.execute(f"put [file://%7bfile_path%7d]file://{file_path} @DATA_LOAD_STAGE auto_compress=true")
+            sfconnector.execute(f"put file://{file_path} @DATA_LOAD_STAGE auto_compress=true")
 
         except Exception as e: 
 
