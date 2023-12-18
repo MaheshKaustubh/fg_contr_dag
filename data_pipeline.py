@@ -101,7 +101,7 @@ def load_to_snow():
 
 
 with DAG(
-    'contractor_dags',
+    'FIELDGLASS_CONTRACTOR_DAG',
     default_args=default_args,
     description='DAG to download file from SFTP',
     schedule_interval='10 10 * * *',
