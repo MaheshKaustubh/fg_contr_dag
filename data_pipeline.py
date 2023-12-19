@@ -166,7 +166,7 @@ def load_to_snow():
 
         try: 
 
-            sfconnector.execute(f"put file://{file_path} @DATA_LOAD_STAGE auto_compress=true")
+            sfconnector.execute(f"put [file://%7bfile_path%7d] @DATA_LOAD_STAGE auto_compress=true")
 
         except Exception as e: 
 
@@ -199,7 +199,7 @@ with DAG(
 
     description='DAG to download file from SFTP',
 
-    schedule_interval='15 17 * * *',
+    schedule_interval='45 5 * * *',
 
     catchup=False
 
