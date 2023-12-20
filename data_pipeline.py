@@ -38,7 +38,7 @@ def check():
 
     from datetime import datetime
 
-    wds=[datetime(2023, 8, 1).date(), datetime(2023, 9, 1).date(), datetime(2023, 10, 3).date(), datetime(2023, 11, 2).date(), datetime(2023, 12, 4).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
+    wds=[datetime(2023,12,20).date(), datetime(2023, 12, 21).date(), datetime(2023, 12, 22).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
 
     if(datetime.now().date() in wds):
 
@@ -166,7 +166,7 @@ def load_to_snow():
 
         try: 
 
-            sfconnector.execute(f"put [file://%7bfile_path%7d] @DATA_LOAD_STAGE auto_compress=true")
+            sfconnector.execute(f"put file://{file_path} @DATA_LOAD_STAGE auto_compress=true")
 
         except Exception as e: 
 
@@ -199,7 +199,7 @@ with DAG(
 
     description='DAG to download file from SFTP',
 
-    schedule_interval='45 5 * * *',
+    schedule_interval='30 7 * * *',
 
     catchup=False
 
