@@ -148,7 +148,7 @@ def load_to_snow():
 
     try:
 
-        sfconnector.execute("create or replace stage DATA_LOAD_STAGE file_format=CSV_HEADER")
+        sfconnector.execute("create or replace stage DATA_LOAD_STAGE file_format=CSV_HEADER_SKIP_TWO")
 
     except Exception as e:
 
