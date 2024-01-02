@@ -148,7 +148,7 @@ def load_to_snow():
 
     try:
 
-        sfconnector.execute("create or replace stage DATA_LOAD_STAGE file_format=CSV_HEADER_SKIP_TWO")
+        sfconnector.execute("create or replace stage DATA_LOAD_STAGE file_format=CSV_HEADER")
 
     except Exception as e:
 
@@ -199,7 +199,7 @@ with DAG(
 
     description='DAG to download file from SFTP',
 
-    schedule_interval='41 14 * * *',
+    schedule_interval='54 14 * * *',
 
     catchup=False
 
