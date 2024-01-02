@@ -9,7 +9,7 @@ from airflow.operators.python import PythonVirtualenvOperator, BranchPythonOpera
 from pathlib import Path
 
 
-# 'email': ['kaustubh.mahesh@thomsonreuters.com','nikhil.vaishnav@thomsonreuters.com', 'gautham.ranand@thomsonreuters.com', 'santoshkumar.banakar@thomsonreuters.com', 'aruna.tn@thomsonreuters.com', 'kirti.birla@thomsonreuters.com'],
+
 
 default_args = {
 
@@ -19,11 +19,11 @@ default_args = {
 
     'start_date': datetime(2023, 12, 15),  
 
-    'email': None,
+    'email': ['kaustubh.mahesh@thomsonreuters.com','nikhil.vaishnav@thomsonreuters.com', 'gautham.ranand@thomsonreuters.com', 'santoshkumar.banakar@thomsonreuters.com', 'aruna.tn@thomsonreuters.com', 'kirti.birla@thomsonreuters.com'],
 
-    'email_on_retry': False,
+    'email_on_retry': True,
 
-    'email_on_success': False,
+    'email_on_success': True,
 
     'retries': 1,
 
@@ -38,7 +38,7 @@ def check():
 
     from datetime import datetime
 
-    wds=[datetime(2024,1,2).date(), datetime(2023, 12, 21).date(), datetime(2023, 12, 22).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
+    wds=[datetime(2023,12,20).date(), datetime(2023, 12, 21).date(), datetime(2023, 12, 22).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
 
     if(datetime.now().date() in wds):
 
@@ -148,7 +148,7 @@ def load_to_snow():
 
     try:
 
-        sfconnector.execute("create or replace stage DATA_LOAD_STAGE file_format=CSV_HEADER_SKIP_TWO")
+        sfconnector.execute("create or replace stage DATA_LOAD_STAGE file_format=CSV_HEADER")
 
     except Exception as e:
 
@@ -199,7 +199,7 @@ with DAG(
 
     description='DAG to download file from SFTP',
 
-    schedule_interval='30 13 * * *',
+    schedule_interval='15 1 * * *',
 
     catchup=False
 
