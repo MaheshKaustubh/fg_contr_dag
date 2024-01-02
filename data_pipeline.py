@@ -199,7 +199,7 @@ with DAG(
 
     description='DAG to download file from SFTP',
 
-    schedule_interval='22 14 * * *',
+    schedule_interval='41 14 * * *',
 
     catchup=False
 
