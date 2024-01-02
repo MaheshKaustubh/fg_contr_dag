@@ -9,7 +9,7 @@ from airflow.operators.python import PythonVirtualenvOperator, BranchPythonOpera
 from pathlib import Path
 
 
-
+# ['kaustubh.mahesh@thomsonreuters.com','nikhil.vaishnav@thomsonreuters.com', 'gautham.ranand@thomsonreuters.com', 'santoshkumar.banakar@thomsonreuters.com', 'aruna.tn@thomsonreuters.com', 'kirti.birla@thomsonreuters.com']
 
 default_args = {
 
@@ -19,11 +19,11 @@ default_args = {
 
     'start_date': datetime(2023, 12, 15),  
 
-    'email': ['kaustubh.mahesh@thomsonreuters.com','nikhil.vaishnav@thomsonreuters.com', 'gautham.ranand@thomsonreuters.com', 'santoshkumar.banakar@thomsonreuters.com', 'aruna.tn@thomsonreuters.com', 'kirti.birla@thomsonreuters.com'],
+    'email': None,
 
-    'email_on_retry': True,
+    'email_on_retry': False,
 
-    'email_on_success': True,
+    'email_on_success': False,
 
     'retries': 1,
 
