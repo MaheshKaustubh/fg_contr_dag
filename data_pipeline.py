@@ -21,9 +21,9 @@ default_args = {
 
     'email': ['kaustubh.mahesh@thomsonreuters.com','nikhil.vaishnav@thomsonreuters.com', 'gautham.ranand@thomsonreuters.com', 'santoshkumar.banakar@thomsonreuters.com', 'aruna.tn@thomsonreuters.com', 'kirti.birla@thomsonreuters.com'],
 
-    'email_on_retry': True,
+    'email_on_retry': False,
 
-    'email_on_success': True,
+    'email_on_success': False,
 
     'retries': 1,
 
@@ -199,7 +199,7 @@ with DAG(
 
     description='DAG to download file from SFTP',
 
-    schedule_interval='00 10 * * *',
+    schedule_interval='00 11 * * *',
 
     catchup=False
 
