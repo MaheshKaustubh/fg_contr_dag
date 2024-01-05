@@ -1,4 +1,4 @@
-from datetime import dt, timedelta, timezone, date
+from datetime import datetime as dt, timedelta, timezone, date
 from distutils.command.clean import clean
 from airflow.decorators import dag, task
 from airflow import DAG
