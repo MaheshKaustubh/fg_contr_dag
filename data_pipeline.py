@@ -1,4 +1,5 @@
-from datetime import datetime as dt, timedelta, timezone, date
+from datetime import timedelta, timezone, date
+import datetime as dt
 from distutils.command.clean import clean
 from airflow.decorators import dag, task
 from airflow import DAG
@@ -124,7 +125,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='48 11 * * *',
+    schedule_interval='53 11 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
