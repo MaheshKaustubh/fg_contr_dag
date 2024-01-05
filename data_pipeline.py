@@ -14,7 +14,7 @@ import snowflake.connector
 default_args = {
     'owner': 'kaustubhmahesh',
     'depends_on_past': False,
-    'start_date': dt(2023, 8, 2),
+    'start_date': dt.datetime(2023, 8, 2),
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,
@@ -125,7 +125,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='53 11 * * *',
+    schedule_interval='57 11 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
