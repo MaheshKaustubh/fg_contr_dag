@@ -36,7 +36,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='26 12 * * *',
+    schedule_interval='26 13 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -66,7 +66,7 @@ with DAG(
         sftp_client.chdir(remote_path)
         for f in sorted(sftp_client.listdir_attr(), key=lambda k: k.st_mtime, reverse=True):
             print(f.filename)
-            down = sftp_client.get(f.filename, f.filename)
+            down = sftp_client.getfo(f.filename, buffer)
             print(down)
             print("File downloaded successfully!")
             break
@@ -75,8 +75,8 @@ with DAG(
         ssh_client.close()
 
 
-
-        df = pd.read_csv(f.filename,skiprows=1)
+        buffer.seek(0)
+        df = pd.read_csv(buffer,skiprows=1)
         df['Start Date'] = pd.to_datetime(df['Start Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
         df['Safe End Date'] = pd.to_datetime(df['Safe End Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
         df['Contract End Date'] = pd.to_datetime(df['Contract End Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
