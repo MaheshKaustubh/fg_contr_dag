@@ -36,7 +36,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='26 13 * * *',
+    schedule_interval='57 13 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -45,7 +45,6 @@ with DAG(
     )
 
     @task()
-
     def test():
         import paramiko
         import zipfile
@@ -134,13 +133,14 @@ with DAG(
             except Exception as e:
                 print(e)
 
+        return
 
     read_write_task= PythonVirtualenvOperator(
         task_id='read_write_snow',
         requirements=["snowflake-connector-python"],
         python_callable=test,
-        # system_site_packages=True,
-        # provide_context=True
+        system_site_packages=True,
+        provide_context=True
     )
 
     @task()
