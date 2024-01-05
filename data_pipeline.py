@@ -1,324 +1,166 @@
-from datetime import datetime, timedelta
-
+from datetime import datetime, timedelta, timezone, date
+from distutils.command.clean import clean
 from airflow.decorators import dag, task
-
 from airflow import DAG
-
 from airflow.operators.python import PythonVirtualenvOperator, BranchPythonOperator, ShortCircuitOperator
+from airflow.operators.bash import BashOperator
+import logging
+from airflow.sensors.python import PythonSensor
+import pandas as pd
+import snowflake.connector
 
-from pathlib import Path
-
-
-# ['kaustubh.mahesh@thomsonreuters.com','nikhil.vaishnav@thomsonreuters.com', 'gautham.ranand@thomsonreuters.com', 'santoshkumar.banakar@thomsonreuters.com', 'aruna.tn@thomsonreuters.com', 'kirti.birla@thomsonreuters.com']
 
 default_args = {
-
     'owner': 'kaustubhmahesh',
-
     'depends_on_past': False,
-
-    'start_date': datetime(2023, 12, 15),  
-
-    'email': None,
-
+    'start_date': datetime(2023, 8, 2),
+    'email_on_failure': False,
     'email_on_retry': False,
-
-    'email_on_success': False,
-
     'retries': 1,
-
     'retry_delay': timedelta(minutes=5),
-
 }
 
 
-
-
 def check():
-
     from datetime import datetime
-
-    wds=[datetime(2024,1,2).date(), datetime(2023, 12, 21).date(), datetime(2023, 12, 22).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
-
+    wds=[datetime(2024,1,5).date(), datetime(2023, 12, 21).date(), datetime(2023, 12, 22).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
     if(datetime.now().date() in wds):
-
         return True
-
     else:
-
         return False
 
-    
 
- 
+def test():
+    import paramiko
+    import zipfile
+    from io import BytesIO
 
-# def read_recent_file():
+    host = 'sftp.ebs.thomsonreuters.com'
+    port = 22
+    username = 'PSarchFGSFTP'
+    password = 'geT4anKu'
+    remote_path = '/Fieldglass'
+    buffer = BytesIO()
 
-#     dir_path = r'\\finsys.int.thomsonreuters.com\forecast_ep$\Fieldglass Report' 
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh_client.connect(hostname=host, username=username, password=password,allow_agent=False)
+    sftp_client = ssh_client.open_sftp()
 
-#     shared_drive_path = Path(dir_path)
+    sftp_client.chdir(remote_path)
+    for f in sorted(sftp_client.listdir_attr(), key=lambda k: k.st_mtime, reverse=True):
+        print(f.filename)
+        down = sftp_client.get(f.filename, f.filename)
+        print(down)
+        print("File downloaded successfully!")
+        break
+    # Close the SFTP session and SSH connection
+    sftp_client.close()
+    ssh_client.close()
 
- 
 
-#     files = [file for file in shared_drive_path.iterdir() if file.is_file()]
 
- 
+    df = pd.read_csv(f.filename,skiprows=1)
+    df['Start Date'] = pd.to_datetime(df['Start Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
+    df['Safe End Date'] = pd.to_datetime(df['Safe End Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
+    df['Contract End Date'] = pd.to_datetime(df['Contract End Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
 
-#     files.sort(key= lambda x: x.stat().st_mtime_ns, reverse=True)
+    df['Snapshot_Date'] = pd.Timestamp.today().strftime('%Y-%m-%d')
+    df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
 
-#     # print(files)
+    def clean_numeric_column(column):
+        return pd.to_numeric(column.replace(',', '', regex=True), errors='coerce', downcast='integer')
 
-#     if files:
 
-#         recent_file = files[0]
+    columns_to_clean = ['Tenure','Tenure based upon Security ID', 'Projected Tenure', 'Profile Worker Bill Rate','Contingent/SOW Worker Bill Rate [ST/Hr]','Contingent/SOW Worker Bill Rate [Monthly Base Salary/MO]','Contingent/SOW Worker Bill Rate [PWD Standard/Day]']
+    df[columns_to_clean] = df[columns_to_clean].apply(clean_numeric_column)
+    df.columns = map(lambda x: str(x).upper(), df.columns)
+    df.transform(lambda x: x.fillna('') if x.dtype == 'object' else x.fillna(0))
 
- 
 
-#         with open(recent_file, 'r', encoding='utf-8', errors= 'ignore') as file:
+    def divide_chunks(l, n):
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
 
-#             content = file.read()
+    data = []
+    time=datetime.datetime.now()
+# if str.strip(row[12]) != '' else None
+    for index, row in df.iterrows():
+        row = tuple(row)+(time,)
+        # row = [None if pd.isna(value) else value for value in row]  # Replace NaT with None
+        row = [value if pd.notnull(value) and not pd.isnull(value) else None for value in row]
+        # print(row)
+        data.append((row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
+                     row[11], row[12] if str.strip(str(row[12])) != '' else None, row[13] if str.strip(str(row[13])) != '' else None, row[14] if str.strip(str(row[14])) != '' else None, row[15], row[16], row[17], row[18], row[19], row[20],
+                    row[21], row[22], row[23], row[24], row[25], row[26], row[27], row[28], row[29], row[30],
+                    row[31], row[32], row[33], row[34], row[35], row[36], row[37], row[38], row[39], row[40],
+                     row[41], row[42], row[43], row[44], row[45], row[46], row[47], row[48], row[49], row[50],
+                    row[51], row[52], row[53], row[54], row[55], row[56], row[57], row[58], row[59], row[60]))
+    # return 
+    conn = snowflake.connector.connect(
+        user='a208043_finance_staging_dev_svc_user',
+        host="a206448_prod.us-east-1.snowflakecomputing.com",
+        account="a206448_prod.us-east-1",
+        warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
+        database="MYDATASPACE",
+        password="612NIxX0Df9kzaP1AcO8",
+        schema="A208043_FINANCE_STAGING_DEV"
+    )
 
-#         return content, recent_file
-
-    
-
-#     else:
-
-#         return None, None
-
-    
-
- 
-
-# content, most_recent_file = read_recent_file()
-
- 
-
-# if content is not None:
-
-#     print(f"Recent file in the folder:  '{most_recent_file}':")
-
-    # print(content)
-
-# else:
-
-#     print("No files found in the directory.")
-
- 
-
-def load_to_snow():
-
-    import snowflake.connector
-
-    import os
-
-    # import boto3
-
-    try:
-
-        conn= snowflake.connector.connect(
-
-                user='a208043_finance_staging_dev_svc_user',
-
-                host="a206448_prod.us-east-1.snowflakecomputing.com",
-
-                account="a206448_prod.us-east-1",
-
-                warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
-
-                database="MYDATASPACE",
-
-                password="612NIxX0Df9kzaP1AcO8",
-
-                schema="A208043_FINANCE_STAGING_DEV"
-
-        )
-
-        sfconnector= conn.cursor()
-
- 
-
-    except Exception as e:
-
-        print(e)
-
-    print("Successfully Created Connection")
-
- 
-
-    try:
-
-        sfconnector.execute("create or replace stage DATA_LOAD_STAGE file_format=CSV_HEADER")
-
-    except Exception as e:
-
-        print(e)
-
- 
-
-    # file_path = 'C:/Users/6126176/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu_79rhkp1fndgsc/LocalState/rootfs/home/kaustubhmahesh/airflow/CONSOLIDATED_WORKER_HEADCOUNT_TEST.csv'    
-
-# C:/Users/6126176/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu_79rhkp1fndgsc/LocalState/rootfs/home/kaustubhmahesh/airflow/CONSOLIDATED_WORKER_HEADCOUNT_TEST.csv
-
-    file_path='/usr/local/airflow/CONSOLIDATED_WORKER_HEADCOUNT_TEST.csv'
-
-    if os.path.exists(file_path):
-
-        try: 
-
-            sfconnector.execute(f"put file://{file_path} @DATA_LOAD_STAGE auto_compress=true")
-
-        except Exception as e: 
-
+    # print(data[1:5])
+    sfconnector = conn.cursor()
+    chunked_rows_final = divide_chunks(
+        data, 16384)
+    chunked_rows_final = list(chunked_rows_final)
+    for l in chunked_rows_final:
+        try:
+            sfconnector.executemany("INSERT INTO CONSOLIDATED_WORKER_HC_TBL_DRAFT_KAUSTUBH (MAIN_DOC_ID, WO_ID, WORKER_ID,SAFE_ID, SECURITY_ID, LAST_NAME, FIRST_NAME, EMAIL_ID, TR_EMAIL_ID, EMAIL_NET_ACCESS_FLG, SUPPLIER_ID, STATUS, START_DATE, SAFE_END_DATE, CONTRACT_END_DATE,WORKER_JOB_TITLE,JOB_CODE,WORKER_TYPE,FTE_DESC,ACCOUNT_TYPE,MGR_NAME,MGR_ID,SUPR_NAME,SUPR_ID,BUSINESS_UNIT_1,DIVISION,BUSINESS_UNIT_2,SUB_BUSINESS_UNIT,REGION,LOC_NAME,LOC_CODE,PRIMARY_COST_CENTER_NAME,PRIMARY_COST_CENTER_CODE,TR_SITE_FLG,FACILITIES_ONLY_FLG,ADDRESS1,ADDRESS2,CITY,STATE,ZIP_CODE,COUNTRY,PHONE_NO,OLD_SAFE_ID,CREATE_DATE,BUYER_REF,COMMENTS,SENSITIVE_ACCESS_FLG,TENURE,PRJ_TENURE,SECID_TENURE,CURRENCY,PROF_WRK_RATE_TYPE,PROF_WRK_BILL_RATE,ST_HR_BILL_RATE,DS_DAY_BILL_RATE,HS_HR_BILL_RATE,ST_MON_MON_MO_BILL_RATE,PWD_SB_ONCALL_HR_BILL_RATE,PWD_ST_DAY_BILL_RATE,STDAY_DAILY_DAY_BILL_RATE,SNAPSHOT_DATE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", l)
+            print("Data Loaded Successfully!")
+        except Exception as e:
             print(e)
-
-    else: 
-
-        print("File not Found")
-
-    try: 
-
-        sfconnector.execute("insert into CONSOLIDATED_WORKER_HC_TBL_DRAFT_KAUSTUBH select t.$1,t.$2,t.$3,t.$4,t.$5,t.$6,t.$7,t.$8,t.$9,t.$10,t.$11,t.$12,t.$13,t.$14,t.$15,t.$16,t.$17,t.$18,t.$19,t.$20,t.$21,t.$22,t.$23,t.$24,t.$25,t.$26,t.$27,t.$28,t.$29,t.$30,t.$31,t.$32,t.$33,t.$34,t.$35,t.$36,t.$37,t.$38,t.$39,t.$40,t.$41,t.$42,t.$43,t.$44,t.$45,t.$46,t.$47,t.$48,t.$49,t.$50,t.$51,t.$52,t.$53,t.$54,t.$55,t.$56,t.$57,t.$58,t.$59,t.$60, current_timestamp from @data_load_stage/CONSOLIDATED_WORKER_HEADCOUNT_TEST.csv.gz as t")
-
-    except Exception as e:
-
-        print(e)
-
-    # import os 
-
-    os.remove('CONSOLIDATED_WORKER_HEADCOUNT_TEST.csv')
-
-
 
 
 with DAG(
-
     'fieldglass_dag',
-
     default_args=default_args,
-
-    description='DAG to download file from SFTP',
-
-    schedule_interval='12 15 * * *',
-
-    catchup=False
-
+    description='DAG to load file to Snowflake from SFTP',
+    schedule_interval='45 11 * * *',
+    catchup=False,
 ) as dag:
+    WDcheck = ShortCircuitOperator(
+        task_id = 'Workday_Check',
+        python_callable = check
+    )
 
-    WDCheck=ShortCircuitOperator(
-
-        task_id='Workday_Check',
-
-        python_callable= check
-
+    read_write_task= PythonVirtualenvOperator(
+        task_id='read_write_snow',
+        requirements=["snowflake-connector-python"],
+        python_callable=test,
+        system_site_packages=True,
+        provide_context=True
     )
 
     @task()
-
-    def download_file_from_sftp():
-
-        import paramiko
-
-        host = 'sftp.ebs.thomsonreuters.com'
-
-        port = 22
-
-        username = 'PSarchFGSFTP'
-
-        password = 'geT4anKu'
-
-        remote_file_path = '/Fieldglass/CONSOLIDATED_WORKER_HEADCOUNT_TEST.csv'
-
-        local_file_path = 'CONSOLIDATED_WORKER_HEADCOUNT_TEST.csv'
-
- 
-
-        try:
-
-            transport = paramiko.Transport((host, port))
-
-            transport.connect(username=username, password=password)
-
-            sftp = paramiko.SFTPClient.from_transport(transport)
-
- 
-
-            down= sftp.get(remote_file_path, local_file_path)
-
-            print(down)
-
-            print("File downloaded successfully!")
-
- 
-
-            sftp.close()
-
-            transport.close()
-
- 
-
-        except Exception as e:
-
-            print(f"Error: {e}")
-
- 
-
-    @task()
-
     def call_sp():
-
-        import snowflake.connector
-
     # import boto3
-
         try:
-
             conn= snowflake.connector.connect(
-
                     user='a208043_finance_staging_dev_svc_user',
-
                     host="a206448_prod.us-east-1.snowflakecomputing.com",
-
                     account="a206448_prod.us-east-1",
-
                     warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
-
                     database="MYDATASPACE",
-
                     password="612NIxX0Df9kzaP1AcO8",
-
                     schema="A208043_FINANCE_STAGING_DEV"
-
             )
-
             sfconnector= conn.cursor()
-
         except Exception as e:
-
             print(e)
-
         print("Successfully Created Connection")
-
         try:
-
             sfconnector.execute("CALL STORED_PROCEDURES_CALL()")
-
         except Exception as e:
-
             print(e)
 
- 
 
-    load_to_snowflake= PythonVirtualenvOperator(
-
-            task_id='load_to_snowflake',
-
-            requirements=["snowflake-connector-python"],
-
-            python_callable=load_to_snow
-
-        )
-
-    WDCheck>>download_file_from_sftp()>>load_to_snowflake>>call_sp()
-
-    # WDCheck>>download_file_from_sftp()>>load_to_snowflake>>call_sp()
+    WDcheck>>test()>>call_sp()
