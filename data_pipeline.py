@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone, date
+from datetime import dt, timedelta, timezone, date
 from distutils.command.clean import clean
 from airflow.decorators import dag, task
 from airflow import DAG
@@ -13,7 +13,7 @@ import snowflake.connector
 default_args = {
     'owner': 'kaustubhmahesh',
     'depends_on_past': False,
-    'start_date': datetime(2023, 8, 2),
+    'start_date': dt(2023, 8, 2),
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,
@@ -83,7 +83,7 @@ def test():
             yield l[i:i + n]
 
     data = []
-    time=datetime.datetime.now()
+    time=dt.datetime.now()
 # if str.strip(row[12]) != '' else None
     for index, row in df.iterrows():
         row = tuple(row)+(time,)
