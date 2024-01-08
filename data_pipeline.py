@@ -3,7 +3,7 @@ import datetime as dt
 from distutils.command.clean import clean
 from airflow.decorators import dag, task
 from airflow import DAG
-from airflow.operators.python import PythonVirtualenvOperator, ShortCircuitOperator
+from airflow.operators.python import PythonVirtualenvOperator, ShortCircuitOperator, PythonOperator
 from airflow.operators.bash import BashOperator
 import logging
 from airflow.sensors.python import PythonSensor
@@ -131,7 +131,7 @@ with DAG(
         python_callable = check
     )
     
-    read_write_snow= PythonVirtualenvOperator(
+    read_write_snow= PythonOperator(
         task_id='read_write_snow',
         requirements=["snowflake-connector-python"],
         python_callable=download_file_from_sftp,
