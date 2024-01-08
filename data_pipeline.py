@@ -126,7 +126,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='48 12 * * *',
+    schedule_interval='50 12 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -134,7 +134,7 @@ with DAG(
         python_callable = check
     )
     
-    read_write_snow= PythonOperator(
+    read_write_snow= PythonVirtualenvOperator(
         task_id='read_write_snow',
         requirements=["snowflake-connector-python","pandas"],
         python_callable=download_file_from_sftp,
