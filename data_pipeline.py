@@ -34,6 +34,9 @@ def check():
 def download_file_from_sftp():
     import paramiko
     from io import BytesIO
+    import datetime as dt
+    import snowflake.connector
+    import pandas as pd 
 
     host = 'sftp.ebs.thomsonreuters.com'
     port = 22
@@ -123,7 +126,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='25 11 * * *',
+    schedule_interval='45 12 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -141,6 +144,7 @@ with DAG(
 
     @task()
     def call_sp():
+        import snowflake.connector
         try:
             conn= snowflake.connector.connect(
                     user='a208043_finance_staging_dev_svc_user',
