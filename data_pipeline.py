@@ -31,7 +31,7 @@ def check():
         return False
 
 
-def test():
+def download_file_from_sftp():
     import paramiko
     from io import BytesIO
 
@@ -130,10 +130,11 @@ with DAG(
         task_id = 'Workday_Check',
         python_callable = check
     )
-    read_write_task= PythonVirtualenvOperator(
+    
+    read_write_snow= PythonVirtualenvOperator(
         task_id='read_write_snow',
         requirements=["snowflake-connector-python"],
-        python_callable=test,
+        python_callable=download_file_from_sftp,
         system_site_packages=True,
         provide_context=True
     )
@@ -160,4 +161,4 @@ with DAG(
             print(e)
 
 
-    WDcheck>>read_write_task>>call_sp()
+    WDcheck>>read_write_snow>>call_sp()
