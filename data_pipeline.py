@@ -24,7 +24,7 @@ default_args = {
 
 def check():
     from datetime import datetime
-    wds=[datetime(2024,1,8).date(), datetime(2023, 12, 21).date(), datetime(2023, 12, 22).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
+    wds=[datetime(2024,1,8).date(), datetime(2024, 1, 9).date(), datetime(2024, 1, 10).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
     if(datetime.now().date() in wds):
         return True
     else:
@@ -33,7 +33,6 @@ def check():
 
 def test():
     import paramiko
-    import zipfile
     from io import BytesIO
 
     host = 'sftp.ebs.thomsonreuters.com'
@@ -124,13 +123,13 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='35 9 * * *',
+    schedule_interval='25 10 * * *',
     catchup=False,
 ) as dag:
-    # WDcheck = ShortCircuitOperator(
-    #     task_id = 'Workday_Check',
-    #     python_callable = check
-    # )
+    WDcheck = ShortCircuitOperator(
+        task_id = 'Workday_Check',
+        python_callable = check
+    )
     read_write_task= PythonVirtualenvOperator(
         task_id='read_write_snow',
         requirements=["snowflake-connector-python"],
@@ -139,26 +138,26 @@ with DAG(
         provide_context=True
     )
 
-    # @task()
-    # def call_sp():
-    #     try:
-    #         conn= snowflake.connector.connect(
-    #                 user='a208043_finance_staging_dev_svc_user',
-    #                 host="a206448_prod.us-east-1.snowflakecomputing.com",
-    #                 account="a206448_prod.us-east-1",
-    #                 warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
-    #                 database="MYDATASPACE",
-    #                 password="612NIxX0Df9kzaP1AcO8",
-    #                 schema="A208043_FINANCE_STAGING_DEV"
-    #         )
-    #         sfconnector= conn.cursor()
-    #     except Exception as e:
-    #         print(e)
-    #     print("Successfully Created Connection")
-    #     try:
-    #         sfconnector.execute("CALL STORED_PROCEDURES_CALL()")
-    #     except Exception as e:
-    #         print(e)
+    @task()
+    def call_sp():
+        try:
+            conn= snowflake.connector.connect(
+                    user='a208043_finance_staging_dev_svc_user',
+                    host="a206448_prod.us-east-1.snowflakecomputing.com",
+                    account="a206448_prod.us-east-1",
+                    warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
+                    database="MYDATASPACE",
+                    password="612NIxX0Df9kzaP1AcO8",
+                    schema="A208043_FINANCE_STAGING_DEV"
+            )
+            sfconnector= conn.cursor()
+        except Exception as e:
+            print(e)
+        print("Successfully Created Connection")
+        try:
+            sfconnector.execute("CALL STORED_PROCEDURES_CALL()")
+        except Exception as e:
+            print(e)
 
 
-    # read_write_task
+    WDcheck>>read_write_task>>call_sp()
