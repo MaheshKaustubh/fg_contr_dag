@@ -36,13 +36,13 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='0 14 * * *',
+    schedule_interval='15 9 * * *',
     catchup=False,
 ) as dag:
-    WDcheck = ShortCircuitOperator(
-        task_id = 'Workday_Check',
-        python_callable = check
-    )
+    # WDcheck = ShortCircuitOperator(
+    #     task_id = 'Workday_Check',
+    #     python_callable = check
+    # )
 
     @task()
     def test():
@@ -166,4 +166,4 @@ with DAG(
             print(e)
 
 
-    WDcheck>>read_write_task>>call_sp()
+    read_write_task
