@@ -24,7 +24,7 @@ default_args = {
 
 def check():
     from datetime import datetime
-    wds=[datetime(2024,1,5).date(), datetime(2023, 12, 21).date(), datetime(2023, 12, 22).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
+    wds=[datetime(2024,1,8).date(), datetime(2023, 12, 21).date(), datetime(2023, 12, 22).date(), datetime(2023, 12, 23).date(), datetime(2023, 12, 24).date(), datetime(2023,12,17).date(), datetime(2023,12,18).date(),datetime(2023,12,19).date()]
     if(datetime.now().date() in wds):
         return True
     else:
