@@ -39,7 +39,9 @@ def download_file_from_sftp():
     from io import BytesIO
     import datetime as dt
     import snowflake.connector
-    import pandas as pd 
+    import pandas as pd
+    import json
+    import boto3
 
     #SFTP Crediantials 
     host = 'sftp.ebs.thomsonreuters.com'
@@ -150,23 +152,38 @@ def download_file_from_sftp():
                     row[41], row[42], row[43], row[44], row[45], row[46], row[47], row[48], row[49], row[50],
                     row[51], row[52], row[53], row[54], row[55], row[56], row[57], row[58], row[59], row[60]))
         # return 
-    conn = snowflake.connector.connect(
-        user='a208043_finance_staging_dev_svc_user',
-        host="a206448_prod.us-east-1.snowflakecomputing.com",
-        account="a206448_prod.us-east-1",
-        warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
-        database="MYDATASPACE",
-        password="612NIxX0Df9kzaP1AcO8",
-        schema="A208043_FINANCE_STAGING_DEV"
-        )
+    client = session.client(service_name='secretsmanager', region_name='us-east-1')
+    response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-STAGING-9Q5nXh', VersionStage='AWSCURRENT')
 
+    secrets=json.loads(response['SecretString'])
+    print(secrets)
+    # Establish a connection to your Snowflake instance
+        conn = snowflake.connector.connect(
+        user=str(secrets["user"]),
+        host=str(secrets["host"]),
+        account=str(secrets["account"]),
+        warehouse=str(secrets["warehouse"]),
+        database=str(secrets["database"]),
+        password=str(secrets["password"]),
+        schema=str(secrets["schema"])
+    )
+    
+    # conn = snowflake.connector.connect(
+    #     user='a208043_finance_staging_dev_svc_user',
+    #     host="a206448_prod.us-east-1.snowflakecomputing.com",
+    #     account="a206448_prod.us-east-1",
+    #     warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
+    #     database="MYDATASPACE",
+    #     password="612NIxX0Df9kzaP1AcO8",
+    #     schema="A208043_FINANCE_STAGING_DEV"
+    #     )
     sfconnector = conn.cursor()
     chunked_rows_final = divide_chunks(
         data, 16384)
     chunked_rows_final = list(chunked_rows_final)
     for l in chunked_rows_final:
         try:
-            sfconnector.executemany("INSERT INTO CONSOLIDATED_WORKER_HC_TBL_DRAFT_KAUSTUBH (MAIN_DOC_ID, WO_ID, WORKER_ID,SAFE_ID, SECURITY_ID, LAST_NAME, FIRST_NAME, EMAIL_ID, TR_EMAIL_ID, EMAIL_NET_ACCESS_FLG, SUPPLIER_ID, STATUS, START_DATE, SAFE_END_DATE, CONTRACT_END_DATE,WORKER_JOB_TITLE,JOB_CODE,WORKER_TYPE,FTE_DESC,ACCOUNT_TYPE,MGR_NAME,MGR_ID,SUPR_NAME,SUPR_ID,BUSINESS_UNIT_1,DIVISION,BUSINESS_UNIT_2,SUB_BUSINESS_UNIT,REGION,LOC_NAME,LOC_CODE,PRIMARY_COST_CENTER_NAME,PRIMARY_COST_CENTER_CODE,TR_SITE_FLG,FACILITIES_ONLY_FLG,ADDRESS1,ADDRESS2,CITY,STATE,ZIP_CODE,COUNTRY,PHONE_NO,OLD_SAFE_ID,CREATE_DATE,BUYER_REF,COMMENTS,SENSITIVE_ACCESS_FLG,TENURE,PRJ_TENURE,SECID_TENURE,CURRENCY,PROF_WRK_RATE_TYPE,PROF_WRK_BILL_RATE,ST_HR_BILL_RATE,DS_DAY_BILL_RATE,HS_HR_BILL_RATE,ST_MON_MON_MO_BILL_RATE,PWD_SB_ONCALL_HR_BILL_RATE,PWD_ST_DAY_BILL_RATE,STDAY_DAILY_DAY_BILL_RATE,SNAPSHOT_DATE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", l)
+            sfconnector.executemany("INSERT INTO CONSOLIDATED_WORKER_HC_TBL (MAIN_DOC_ID, WO_ID, WORKER_ID,SAFE_ID, SECURITY_ID, LAST_NAME, FIRST_NAME, EMAIL_ID, TR_EMAIL_ID, EMAIL_NET_ACCESS_FLG, SUPPLIER_ID, STATUS, START_DATE, SAFE_END_DATE, CONTRACT_END_DATE,WORKER_JOB_TITLE,JOB_CODE,WORKER_TYPE,FTE_DESC,ACCOUNT_TYPE,MGR_NAME,MGR_ID,SUPR_NAME,SUPR_ID,BUSINESS_UNIT_1,DIVISION,BUSINESS_UNIT_2,SUB_BUSINESS_UNIT,REGION,LOC_NAME,LOC_CODE,PRIMARY_COST_CENTER_NAME,PRIMARY_COST_CENTER_CODE,TR_SITE_FLG,FACILITIES_ONLY_FLG,ADDRESS1,ADDRESS2,CITY,STATE,ZIP_CODE,COUNTRY,PHONE_NO,OLD_SAFE_ID,CREATE_DATE,BUYER_REF,COMMENTS,SENSITIVE_ACCESS_FLG,TENURE,PRJ_TENURE,SECID_TENURE,CURRENCY,PROF_WRK_RATE_TYPE,PROF_WRK_BILL_RATE,ST_HR_BILL_RATE,DS_DAY_BILL_RATE,HS_HR_BILL_RATE,ST_MON_MON_MO_BILL_RATE,PWD_SB_ONCALL_HR_BILL_RATE,PWD_ST_DAY_BILL_RATE,STDAY_DAILY_DAY_BILL_RATE,SNAPSHOT_DATE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", l)
             print("Data Loaded Successfully!")
         except Exception as e:
             print(e)
@@ -176,7 +193,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='50 12 * * *',
+    schedule_interval='30 1 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -194,17 +211,34 @@ with DAG(
 
     @task()
     def call_sp():
+        import boto3
+        import json
         import snowflake.connector
+        client = session.client(service_name='secretsmanager', region_name='us-east-1')
+        response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-STAGING-9Q5nXh', VersionStage='AWSCURRENT')
+
+        secrets=json.loads(response['SecretString'])
+        print(secrets)
         try:
-            conn= snowflake.connector.connect(
-                    user='a208043_finance_staging_dev_svc_user',
-                    host="a206448_prod.us-east-1.snowflakecomputing.com",
-                    account="a206448_prod.us-east-1",
-                    warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
-                    database="MYDATASPACE",
-                    password="612NIxX0Df9kzaP1AcO8",
-                    schema="A208043_FINANCE_STAGING_DEV"
+            conn = snowflake.connector.connect(
+                user=str(secrets["user"]),
+                host=str(secrets["host"]),
+                account=str(secrets["account"]),
+                warehouse=str(secrets["warehouse"]),
+                database=str(secrets["database"]),
+                password=str(secrets["password"]),
+                schema=str(secrets["schema"])
             )
+            sfconnector= conn.cursor()
+            # conn= snowflake.connector.connect(
+            #         user='a208043_finance_staging_dev_svc_user',
+            #         host="a206448_prod.us-east-1.snowflakecomputing.com",
+            #         account="a206448_prod.us-east-1",
+            #         warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
+            #         database="MYDATASPACE",
+            #         password="612NIxX0Df9kzaP1AcO8",
+            #         schema="A208043_FINANCE_STAGING_DEV"
+            # )
             sfconnector= conn.cursor()
         except Exception as e:
             print(e)
