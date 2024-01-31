@@ -158,7 +158,7 @@ def download_file_from_sftp():
     secrets=json.loads(response['SecretString'])
     print(secrets)
     # Establish a connection to your Snowflake instance
-        conn = snowflake.connector.connect(
+    conn = snowflake.connector.connect(
         user=str(secrets["user"]),
         host=str(secrets["host"]),
         account=str(secrets["account"]),
