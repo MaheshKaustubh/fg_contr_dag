@@ -152,6 +152,7 @@ def download_file_from_sftp():
                     row[41], row[42], row[43], row[44], row[45], row[46], row[47], row[48], row[49], row[50],
                     row[51], row[52], row[53], row[54], row[55], row[56], row[57], row[58], row[59], row[60]))
         # return 
+    session=boto3.Session()
     client = session.client(service_name='secretsmanager', region_name='us-east-1')
     response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-STAGING-9Q5nXh', VersionStage='AWSCURRENT')
 
@@ -193,7 +194,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='30 1 * * *',
+    schedule_interval='10 7 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -214,6 +215,8 @@ with DAG(
         import boto3
         import json
         import snowflake.connector
+        
+        session=boto3.Session()
         client = session.client(service_name='secretsmanager', region_name='us-east-1')
         response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-STAGING-9Q5nXh', VersionStage='AWSCURRENT')
 
