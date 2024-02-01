@@ -168,7 +168,7 @@ def download_file_from_sftp():
         warehouse=str(secrets["warehouse"]),
         database=str(secrets["database"]),
         password=str(secrets["password"]),
-        schema=str(secrets["schema"])
+        schema="A208043_FINANCE_STAGING"
     )
     
     # conn = snowflake.connector.connect(
@@ -196,7 +196,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='06 14 * * *',
+    schedule_interval='15 15 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -232,7 +232,7 @@ with DAG(
                 warehouse=str(secrets["warehouse"]),
                 database=str(secrets["database"]),
                 password=str(secrets["password"]),
-                schema=str(secrets["schema"])
+                schema="A208043_FINANCE_STAGING"
             )
             sfconnector= conn.cursor()
             # conn= snowflake.connector.connect(
