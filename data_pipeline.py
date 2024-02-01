@@ -119,9 +119,11 @@ def download_file_from_sftp():
     df['Start Date'] = pd.to_datetime(df['Start Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
     df['Safe End Date'] = pd.to_datetime(df['Safe End Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
     df['Contract End Date'] = pd.to_datetime(df['Contract End Date'], errors='coerce').dt.strftime('%Y-%m-%d').replace('NaT','')
-
-    df['Snapshot_Date'] = pd.Timestamp.today().strftime('%Y-%m-%d')
+    df = df[~df['Contingent/SOW Worker Bill Rate [ST/Day (Daily)/Day]'].apply(lambda x: pd.notna(x) and str(x).startswith('Macro Ran:'))]
+    df['Primary Cost Center Code'] = df['Primary Cost Center Code'].fillna(0).astype(int)
     df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
+    df['Snapshot_Date'] = pd.Timestamp.today().strftime('%Y-%m-%d')
+    # df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
 
     def clean_numeric_column(column):
         return pd.to_numeric(column.replace(',', '', regex=True), errors='coerce', downcast='integer')
@@ -194,7 +196,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='12 9 * * *',
+    schedule_interval='16 10 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
