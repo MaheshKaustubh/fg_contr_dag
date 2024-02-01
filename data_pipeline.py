@@ -156,7 +156,7 @@ def download_file_from_sftp():
         # return 
     session=boto3.Session()
     client = session.client(service_name='secretsmanager', region_name='us-east-1')
-    response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-STAGING-9Q5nXh', VersionStage='AWSCURRENT')
+    response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-CONSREVENUE-5k48RX', VersionStage='AWSCURRENT')
 
     secrets=json.loads(response['SecretString'])
     print(secrets)
@@ -196,7 +196,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='45 12 * * *',
+    schedule_interval='35 13 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -220,7 +220,7 @@ with DAG(
         
         session=boto3.Session()
         client = session.client(service_name='secretsmanager', region_name='us-east-1')
-        response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-STAGING-9Q5nXh', VersionStage='AWSCURRENT')
+        response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-CONSREVENUE-5k48RX', VersionStage='AWSCURRENT')
 
         secrets=json.loads(response['SecretString'])
         print(secrets)
