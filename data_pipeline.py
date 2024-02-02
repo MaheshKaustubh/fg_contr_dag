@@ -196,7 +196,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='15 15 * * *',
+    schedule_interval='55 8 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
