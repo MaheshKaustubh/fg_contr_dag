@@ -159,7 +159,7 @@ def download_file_from_sftp():
     response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-CONSREVENUE-5k48RX', VersionStage='AWSCURRENT')
 
     secrets=json.loads(response['SecretString'])
-    print(secrets)
+    # print(secrets)
     # Establish a connection to your Snowflake instance
     conn = snowflake.connector.connect(
         user=str(secrets["user"]),
@@ -170,16 +170,6 @@ def download_file_from_sftp():
         password=str(secrets["password"]),
         schema=str(secrets["schema"])
     )
-    
-    # conn = snowflake.connector.connect(
-    #     user='a208043_finance_staging_dev_svc_user',
-    #     host="a206448_prod.us-east-1.snowflakecomputing.com",
-    #     account="a206448_prod.us-east-1",
-    #     warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
-    #     database="MYDATASPACE",
-    #     password="612NIxX0Df9kzaP1AcO8",
-    #     schema="A208043_FINANCE_STAGING_DEV"
-    #     )
     sfconnector = conn.cursor()
     chunked_rows_final = divide_chunks(
         data, 16384)
@@ -196,7 +186,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='18 8 * * *',
+    schedule_interval='3 9 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -223,7 +213,7 @@ with DAG(
         response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-CONSREVENUE-5k48RX', VersionStage='AWSCURRENT')
 
         secrets=json.loads(response['SecretString'])
-        print(secrets)
+        # print(secrets)
         try:
             conn = snowflake.connector.connect(
                 user=str(secrets["user"]),
@@ -235,15 +225,6 @@ with DAG(
                 schema=str(secrets["schema"])
             )
             sfconnector= conn.cursor()
-            # conn= snowflake.connector.connect(
-            #         user='a208043_finance_staging_dev_svc_user',
-            #         host="a206448_prod.us-east-1.snowflakecomputing.com",
-            #         account="a206448_prod.us-east-1",
-            #         warehouse="A208043_FINANCE_STAGING_DEV_MDS_WH",
-            #         database="MYDATASPACE",
-            #         password="612NIxX0Df9kzaP1AcO8",
-            #         schema="A208043_FINANCE_STAGING_DEV"
-            # )
         except Exception as e:
             print(e)
         print("Successfully Created Connection")
