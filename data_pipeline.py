@@ -24,7 +24,7 @@ default_args = {
 
 def check():
     from datetime import datetime
-    wds=[datetime(2024,1,22).date(),datetime(2024,2,1).date(), datetime(2024, 3, 1).date(), datetime(2024, 4, 1).date(),
+    wds=[datetime(2024,1,22).date(),datetime(2024,2,6).date(), datetime(2024, 3, 1).date(), datetime(2024, 4, 1).date(),
         datetime(2024, 5, 2).date(), datetime(2024, 6, 3).date(), datetime(2024, 7, 1).date(),
         datetime(2024, 8, 1).date(), datetime(2024, 9, 2).date(), datetime(2024, 10, 1).date(),
         datetime(2024, 4, 11).date(), datetime(2024, 12, 2).date()]
@@ -123,6 +123,9 @@ def download_file_from_sftp():
     df['Primary Cost Center Code'] = df['Primary Cost Center Code'].fillna(0).astype(int)
     df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
     df['Snapshot_Date'] = pd.Timestamp.today().strftime('%Y-%m-%d')
+    df['Create Date'] = pd.to_datetime(df['Create Date'], errors='coerce').fillna('')
+    df['Create Date'] = df['Create Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    df['Create Date'] = df['Create Date'].astype(str)
     # df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
 
     def clean_numeric_column(column):
@@ -186,7 +189,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='3 9 * * *',
+    schedule_interval='42 13 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
