@@ -24,7 +24,7 @@ default_args = {
 
 def check():
     from datetime import datetime
-    wds=[datetime(2024,1,22).date(),datetime(2024,2,1).date(), datetime(2024, 3, 1).date(), datetime(2024, 4, 1).date(),
+    wds=[datetime(2024,2,14).date(),datetime(2024,2,1).date(), datetime(2024, 3, 1).date(), datetime(2024, 4, 1).date(),
         datetime(2024, 5, 2).date(), datetime(2024, 6, 3).date(), datetime(2024, 7, 1).date(),
         datetime(2024, 8, 1).date(), datetime(2024, 9, 2).date(), datetime(2024, 10, 1).date(),
         datetime(2024, 4, 11).date(), datetime(2024, 12, 2).date()]
@@ -189,7 +189,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='42 13 * * *',
+    schedule_interval='25 10 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
