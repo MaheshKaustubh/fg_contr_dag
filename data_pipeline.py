@@ -68,9 +68,9 @@ def download_file_from_sftp():
         print("File downloaded successfully!")
 
         # Move the downloaded file to the "Archived" folder
-        new_path = f"{archive_path}/{f.filename}"
-        sftp_client.rename(f.filename, new_path)
-        print(f"File moved to '{new_path}'")
+        # new_path = f"{archive_path}/{f.filename}"
+        # sftp_client.rename(f.filename, new_path)
+        # print(f"File moved to '{new_path}'")
 
         break  # Stop after processing the latest file
 
@@ -189,7 +189,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='25 10 * * *',
+    schedule_interval='47 10 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
