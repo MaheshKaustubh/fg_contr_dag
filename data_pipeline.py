@@ -123,6 +123,9 @@ def download_file_from_sftp():
     df['Primary Cost Center Code'] = df['Primary Cost Center Code'].fillna(0).astype(int)
     df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
     df['Snapshot_Date'] = pd.Timestamp.today().strftime('%Y-%m-%d')
+    df['Create Date'] = pd.to_datetime(df['Create Date'], errors= 'coerce').fillna('')
+    df['Create Date'] = df['Create Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    df['Create Date'] = df['Create Date'].astype(str)
     # df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
 
     def clean_numeric_column(column):
@@ -162,7 +165,7 @@ def download_file_from_sftp():
     response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-CONSREVENUE-5k48RX', VersionStage='AWSCURRENT')
 
     secrets=json.loads(response['SecretString'])
-    # print(secrets)
+    print(secrets)
     # Establish a connection to your Snowflake instance
     conn = snowflake.connector.connect(
         user=str(secrets["user"]),
@@ -189,7 +192,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='5 10 * * *',
+    schedule_interval='40 10 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -237,4 +240,4 @@ with DAG(
             print(e)
 
 
-    WDcheck>>read_write_snow>>call_sp()
+    WDcheck>>read_write_snow
