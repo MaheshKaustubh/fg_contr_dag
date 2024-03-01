@@ -123,9 +123,9 @@ def download_file_from_sftp():
     df['Primary Cost Center Code'] = df['Primary Cost Center Code'].fillna(0).astype(int)
     df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
     df['Snapshot_Date'] = pd.Timestamp.today().strftime('%Y-%m-%d')
-    df['Create Date'] = pd.to_datetime(df['Create Date'], errors= 'coerce').fillna('')
-    df['Create Date'] = df['Create Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
-    df['Create Date'] = df['Create Date'].astype(str)
+    # df['Create Date'] = pd.to_datetime(df['Create Date'], errors= 'coerce').fillna('')
+    # df['Create Date'] = df['Create Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    # df['Create Date'] = df['Create Date'].astype(str)
     # df['Primary Cost Center Code'] = df['Primary Cost Center Code'].astype(str)
 
     def clean_numeric_column(column):
