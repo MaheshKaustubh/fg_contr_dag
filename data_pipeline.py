@@ -26,8 +26,8 @@ def check():
     from datetime import datetime
     wds=[datetime(2024,2,29).date(), datetime(2024, 3, 1).date(), datetime(2024, 4, 2).date(),
         datetime(2024, 5, 2).date(), datetime(2024, 6, 3).date(), datetime(2024, 7, 1).date(),
-        datetime(2024, 8, 1).date(), datetime(2024, 9, 2).date(), datetime(2024, 10, 1).date(),
-        datetime(2024, 4, 11).date(), datetime(2024, 12, 2).date()]
+        datetime(2024, 8, 1).date(), datetime(2024, 9, 3).date(), datetime(2024, 10, 1).date(),
+        datetime(2024, 11, 1).date(), datetime(2024, 12, 3).date()]
     if(datetime.now().date() in wds):
         return True
     else:
@@ -77,10 +77,10 @@ def download_file_from_sftp():
     # Function to remove file from archived folder.
     def archive_file_remove():
         from datetime import datetime
-        wds=[datetime(2024,1,22).date(),datetime(2024, 3, 1).date(), datetime(2024, 4, 1).date(),
-             datetime(2024, 5, 2).date(), datetime(2024, 6, 3).date(), datetime(2024, 7, 1).date(),
-             datetime(2024, 8, 1).date(), datetime(2024, 9, 2).date(), datetime(2024, 10, 1).date(),
-             datetime(2024, 4, 11).date(), datetime(2024, 12, 2).date()]
+        wds=[datetime(2024,1,22).date(), datetime(2024, 3, 1).date(), datetime(2024, 4, 2).date(),
+        datetime(2024, 5, 2).date(), datetime(2024, 6, 3).date(), datetime(2024, 7, 1).date(),
+        datetime(2024, 8, 1).date(), datetime(2024, 9, 3).date(), datetime(2024, 10, 1).date(),
+        datetime(2024, 11, 1).date(), datetime(2024, 12, 3).date()]
         if(datetime.now().date() in wds):
             host = 'sftp.ebs.thomsonreuters.com'
             port = 22
