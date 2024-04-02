@@ -235,7 +235,7 @@ with DAG(
             print(e)
         print("Successfully Created Connection")
         try:
-            sfconnector.execute("CALL MYDATASPACE.A208043_FINANCE_STAGING.FIELDGLASS_FINAL_TRANSFORMATION_SP()")
+            sfconnector.execute("CALL MYDATASPACE.A208043_FINANCE_STAGING.CONTRACTOR_MONTHLY_LOAD_TRANSFORMATION()")
         except Exception as e:
             print(e)
 
