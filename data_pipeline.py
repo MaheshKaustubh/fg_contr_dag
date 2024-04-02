@@ -240,4 +240,4 @@ with DAG(
             print(e)
 
 
-    WDcheck>>read_write_snow
+    WDcheck>>read_write_snow>>call_sp()
