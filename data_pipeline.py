@@ -191,7 +191,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='30 9 * * *',
+    schedule_interval='55 8 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -234,7 +234,7 @@ with DAG(
             print(e)
         print("Successfully Created Connection")
         try:
-            sfconnector.execute("CALL MYDATASPACE.A208043_FINANCE_STAGING.CONTRACTOR_MONTHLY_LOAD_TRANSFORMATION()")
+            sfconnector.execute("CALL MYDATASPACE.A208043_FINANCE_STAGING.FIELDGLASS_FINAL_TRANSFORMATION_SP()")
         except Exception as e:
             print(e)
 
