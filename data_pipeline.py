@@ -191,7 +191,7 @@ with DAG(
     'fieldglass_dag',
     default_args=default_args,
     description='DAG to load file to Snowflake from SFTP',
-    schedule_interval='55 8 * * *',
+    schedule_interval='45 6 * * *',
     catchup=False,
 ) as dag:
     WDcheck = ShortCircuitOperator(
@@ -218,7 +218,7 @@ with DAG(
         response = client.get_secret_value(SecretId='arn:aws:secretsmanager:us-east-1:573491702041:secret:a206529-MDS-CONSREVENUE-5k48RX', VersionStage='AWSCURRENT')
 
         secrets=json.loads(response['SecretString'])
-        # print(secrets)
+        print(secrets)
         try:
             conn = snowflake.connector.connect(
                 user=str(secrets["user"]),
